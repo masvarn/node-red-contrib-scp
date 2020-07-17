@@ -1,7 +1,7 @@
 {
   "name": "node-red-contrib-scp",
-  "version": "0.0.1",
-  "description": "download from scp server",
+  "version": "0.0.2",
+  "description": "Download from SCP server",
   "main": "index.js",
   "dependencies": {
     "ssh2": "~0.8.7"
@@ -15,6 +15,7 @@
   
   "author": "Luis Diener",
   "license": "ISC",
+  "homepage":"https://github.com/masvarn/node-red-contrib-scp",
 "keywords": [
 "node-red",
 "scp",
