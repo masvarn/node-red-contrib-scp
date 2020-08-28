@@ -101,7 +101,7 @@ async function download(){
 			});
 
 			conn.on('end', () => {
-				if (filesize === datasize) {
+				if (filesize == datasize) {
 					msg.fail = 0;
 					node.send(msg)
 					resolve('end');
@@ -109,7 +109,7 @@ async function download(){
 				}
 				else{
 				msg.fail = 1;
-				er="download incomplete"+"Download: "+datasize+" On Server: "+filesize
+				let er="download incomplete"+"Download: "+datasize+" On Server: "+filesize
 				done(er)
 				reject(er)
 				}
