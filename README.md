@@ -1,9 +1,8 @@
 # Description
 
 The intended use for this node is to download files from a Siemens NCU.
-However it should be possible to download files from any SCP-Server.
+Currently only aes-256-cbc, dh-g1-sha1, hmac-sha1!
 
-Using [ssh2](https://github.com/mscdex/ssh2) module.
 
 ## Installation
 
@@ -14,7 +13,7 @@ Using [ssh2](https://github.com/mscdex/ssh2) module.
 Example of a Node-Red function to feed the node
 
 ```js
-msg.path = "remote/path/to/file.txt";
+msg.remote = "remote/path/to/file.txt";
 msg.host = "192.168.XX.XXX";
 msg.user = "user";
 msg.password = "password";
