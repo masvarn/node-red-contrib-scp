@@ -63,14 +63,10 @@ class SSH{
 	constructor(port,host){
 		client = new net.Socket()
 		client.on('data', data  =>{
-            // if (global_decrypt === true){
-            //     console.log(data.length)
-            // }
             this.answer(data)
-        })
-        client.on('message', data  =>{
-           // console.log(data)
-        })
+        	})
+       		client.on('message', data  =>{
+     		})
 		client.on('error', err  => {
 			this.error(err);
 		})
