@@ -380,7 +380,7 @@ class SSH{
     buffer = encrypt(buffer)
     requested_message = "5e"
     result = await this.request(buffer)
-let databuffer = result
+    let databuffer = result
     //and again to confirm download is completed
 
     payload = length_buf(buf([0]))
@@ -438,34 +438,40 @@ request(message){
     return promise;
 }
 
-//parses incoming data
+// parses incoming data
+// server may send one message or more in one response, long messages may be split into multiple responses
+// this function makes sure every message is decrypted and no data gets lost
+// because the cipher uses cipher-block-chaining special care was put in order to avoid decrypting wrong parts of messages which would result in a currupt IV
 answer(data){
    if (global_decrypt === false){
+	   // data needs no decryption
     this.responsePromise.resolve(data);
    }else{
-    temp = Buffer.concat([temp,data])
+	   // data need decryption
+    temp = Buffer.concat([temp,data]) //buffering incoming data
     data = temp
-    //console.log(data.length)
-    //console.log(global_pre_iv)
-       let plain = decrypt(data,0,16)
-       let length = parseInt(plain.slice(0,4).toString('hex'),16)
+   
+       let plain = decrypt(data,0,16)			// decrypt first 16 byte to gain length of message
+       let length = parseInt(plain.slice(0,4).toString('hex'),16)	// length of message to decrypt
 
-       let expectedbytes = length + 4
+       let expectedbytes = length + 4			//expected bytes of incoming message
     
-       if (expectedbytes <= (data.length - 20)){
+       if (expectedbytes <= (data.length - 20)){	// if the announced message is longer than the data stored in temp, no further processing takes place
+	       						// promise won't be fulfilled so programm is in a waiting state.
         if (expectedbytes <= 16){ 
             this.responsePromise.resolve(plain)
             temp = Buffer.from([])
         }else{
-        plain = Buffer.concat([plain,decrypt(data,16,length+4)])
-        temp = temp.slice(length+24)
+        plain = Buffer.concat([plain,decrypt(data,16,length+4)])	// decrypt all, FYI: HMAC is not decrypted thats why often 24 are subtracted
+        temp = temp.slice(length+24)			//remove decrypted message+HMAC from temp
 
-       while(length + 16 < (data.length - 24)){
+       while(length + 16 < (data.length - 24)){		//data may contain multiple messages, loop makes sure every COMPLETE message is processed/decrypted
         data = data.slice(length+24);
         let decrypted = decrypt(data,0,16)
         length = parseInt(decrypted.slice(0,4).toString('hex'),16)
 
         if (length > (data.length - 24)){ 
+							// same as before, remaining data doesn't contain full message so iv is resetted, explenation see below
             global_server_iv = global_pre_iv
         }else{
         plain = Buffer.concat([plain,decrypted])
@@ -475,10 +481,10 @@ answer(data){
         temp = temp.slice(length+24)
     }
         }
-
-         this.parse4promise(plain)
+         this.parse4promise(plain)	//return promise
 
         }}else {
+		// initialisation vector is resetted so that next time the temp is filled, decryption works again for the first 16 byte of the message
             global_server_iv = global_pre_iv
     }
 
